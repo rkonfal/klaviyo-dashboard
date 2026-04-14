@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klaviyo Analytics — Diamond Plus</title>
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #1a1d27;
+  --bg3: #22263a;
+  --border: #2e3250;
+  --accent: #6c63ff;
+  --accent2: #ff6584;
+  --green: #22c55e;
+  --red: #ef4444;
+  --orange: #f97316;
+  --yellow: #eab308;
+  --blue: #3b82f6;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --nav-h: 60px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; }
+
+/* NAV */
+.top-nav {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h);
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; z-index: 100;
+}
+.nav-brand { display: flex; flex-direction: column; }
+.nav-brand h1 { font-size: 16px; font-weight: 700; color: var(--text); }
+.nav-brand span { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.nav-links { display: flex; gap: 4px; }
+.nav-links a {
+  padding: 6px 12px; border-radius: 6px; color: var(--text2);
+  text-decoration: none; font-size: 12px; transition: all .15s;
+}
+.nav-links a:hover { background: var(--bg3); color: var(--text); }
+.nav-badge {
+  background: var(--accent); color: #fff; font-size: 10px;
+  padding: 2px 7px; border-radius: 99px; font-weight: 600;
+}
+
+/* LAYOUT */
+.page { margin-top: var(--nav-h); padding: 32px 24px; max-width: 1400px; margin-left: auto; margin-right: auto; }
+.section { margin-bottom: 48px; }
+.section-header { margin-bottom: 20px; }
+.section-header h2 { font-size: 18px; font-weight: 700; color: var(--text); }
+.section-header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+/* KPI CARDS */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+.kpi-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 20px; display: flex; flex-direction: column; gap: 6px;
+}
+.kpi-card .kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; }
+.kpi-card .kpi-value { font-size: 28px; font-weight: 700; color: var(--text); }
+.kpi-card .kpi-sub { font-size: 11px; color: var(--text2); }
+.kpi-card.highlight { border-color: var(--accent); }
+
+/* STATUS BADGE */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 99px; font-size: 11px; font-weight: 600;
+}
+.badge-live { background: rgba(34,197,94,.15); color: var(--green); }
+.badge-draft { background: rgba(239,68,68,.12); color: var(--red); }
+.badge-manual { background: rgba(100,116,139,.12); color: var(--text3); }
+.dot { width: 6px; height: 6px; border-radius: 50%; }
+.dot-live { background: var(--green); }
+.dot-draft { background: var(--red); }
+.dot-manual { background: var(--text3); }
+
+/* TABLE */
+.table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  background: var(--bg3); padding: 12px 16px; text-align: left;
+  font-size: 11px; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--text3); border-bottom: 1px solid var(--border);
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,.02); }
+td { padding: 12px 16px; font-size: 13px; vertical-align: top; }
+td.flow-name { font-weight: 600; color: var(--text); max-width: 220px; }
+td.flow-explain { color: var(--text2); font-size: 12px; max-width: 340px; line-height: 1.5; }
+td.flow-trigger { color: var(--text3); font-size: 11px; max-width: 160px; }
+
+/* GAP CARDS */
+.gap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.gap-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+}
+.gap-card.priority-high { border-left: 3px solid var(--red); }
+.gap-card.priority-medium { border-left: 3px solid var(--orange); }
+.gap-card.priority-low { border-left: 3px solid var(--yellow); }
+.gap-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.gap-card .gap-status { margin-bottom: 10px; }
+.gap-card .gap-section { margin-bottom: 10px; }
+.gap-card .gap-section label { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); display: block; margin-bottom: 2px; }
+.gap-card .gap-section p { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.gap-card .gap-impact { background: rgba(108,99,255,.1); border: 1px solid rgba(108,99,255,.2); border-radius: 8px; padding: 10px; margin-top: 10px; }
+.gap-card .gap-impact label { font-size: 10px; text-transform: uppercase; color: var(--accent); letter-spacing: .5px; display: block; margin-bottom: 3px; }
+.gap-card .gap-impact p { font-size: 12px; color: var(--text); }
+.gap-card .gap-action { margin-top: 12px; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; }
+.gap-action-easy { background: rgba(34,197,94,.1); color: var(--green); }
+.gap-action-medium { background: rgba(249,115,22,.1); color: var(--orange); }
+.gap-action-hard { background: rgba(239,68,68,.1); color: var(--red); }
+
+/* EXPLAINER BOX */
+.explainer {
+  background: var(--bg3); border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 4px 0; font-size: 12px; color: var(--text2); line-height: 1.5;
+}
+.explainer strong { color: var(--text); }
+
+/* STATS BAR */
+.stats-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.stat-pill {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 99px;
+  padding: 6px 14px; font-size: 12px; color: var(--text2);
+}
+.stat-pill strong { color: var(--text); }
+
+/* SEGMENTS TABLE */
+.seg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.seg-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px; display: flex; flex-direction: column; gap: 4px;
+}
+.seg-card h4 { font-size: 13px; font-weight: 600; }
+.seg-card p { font-size: 11px; color: var(--text2); line-height: 1.5; }
+.seg-card .seg-tag { font-size: 10px; color: var(--text3); }
+
+/* RECOMMENDATION TABLE */
+.rec-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+.rec-table { width: 100%; border-collapse: collapse; }
+.rec-table thead th { background: var(--bg3); padding: 12px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); border-bottom: 1px solid var(--border); }
+.rec-table td { padding: 12px 14px; font-size: 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.rec-table tr:last-child td { border-bottom: none; }
+.rec-table tr:hover td { background: rgba(255,255,255,.02); }
+.pri-badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 700; }
+.pri-1 { background: rgba(239,68,68,.15); color: var(--red); }
+.pri-2 { background: rgba(249,115,22,.15); color: var(--orange); }
+.pri-3 { background: rgba(234,179,8,.12); color: var(--yellow); }
+.effort-easy { color: var(--green); font-weight: 600; }
+.effort-med { color: var(--orange); font-weight: 600; }
+.effort-hard { color: var(--red); font-weight: 600; }
+
+/* GLOSSARY */
+.glossary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.glossary-item {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px;
+}
+.glossary-item h4 { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+.glossary-item p { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+/* MGMT CARDS */
+.mgmt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+.mgmt-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 22px;
+}
+.mgmt-card .mgmt-role { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.mgmt-card blockquote { font-size: 13px; color: var(--text); line-height: 1.7; font-style: italic; border-left: 2px solid var(--accent); padding-left: 14px; }
+.mgmt-card .mgmt-points { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+.mgmt-card .mgmt-point { font-size: 12px; color: var(--text2); padding: 6px 10px; background: var(--bg3); border-radius: 6px; }
+
+/* CAMPAIGN SECTION */
+.campaign-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.camp-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.camp-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+.freq-bar { display: flex; flex-direction: column; gap: 6px; }
+.freq-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+.freq-row .freq-label { width: 80px; color: var(--text2); }
+.freq-row .freq-track { flex: 1; background: var(--bg3); border-radius: 4px; height: 8px; }
+.freq-row .freq-fill { height: 8px; border-radius: 4px; background: var(--accent); }
+.freq-row .freq-val { width: 30px; text-align: right; color: var(--text3); font-size: 11px; }
+
+/* DIVIDER */
+.divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+/* PRINT */
+@media print {
+  .top-nav { position: static; }
+  .page { margin-top: 0; }
+  body { background: #fff; color: #111; }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .campaign-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .page { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="nav-brand">
+    <h1>📧 Klaviyo Analytics — Diamond Plus</h1>
+    <span>Email Marketing · Automatizace · Analýza účtu k 14. 4. 2026</span>
+  </div>
+  <div class="nav-links">
+    <a href="#kpi">KPI</a>
+    <a href="#flows">Flows</a>
+    <a href="#gaps">Co chybí</a>
+    <a href="#campaigns">Kampaně</a>
+    <a href="#segments">Segmenty</a>
+    <a href="#recommendations">Doporučení</a>
+    <a href="#glossary">Slovníček</a>
+    <a href="#management">Management</a>
+    <span class="nav-badge">Live data</span>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- KPI OVERVIEW -->
+  <section class="section" id="kpi">
+    <div class="section-header">
+      <h2>📊 KPI Přehled</h2>
+      <p>Klíčové ukazatele stavu Klaviyo účtu — Království tianDe / Diamond Plus s.r.o.</p>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card highlight">
+        <div class="kpi-label">Celkem kampaní</div>
+        <div class="kpi-value">400+</div>
+        <div class="kpi-sub">~370 odesláno · ~30 draft</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Aktivních flows</div>
+        <div class="kpi-value">27</div>
+        <div class="kpi-sub" style="color:var(--red)">27 v draftu — neaktivní!</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Celkem flows</div>
+        <div class="kpi-value">54</div>
+        <div class="kpi-sub">50% live · 50% draft</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Segmentů</div>
+        <div class="kpi-value">27</div>
+        <div class="kpi-sub">Engagement + geo targeting</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Seznamů (lists)</div>
+        <div class="kpi-value">40+</div>
+        <div class="kpi-sub">SMS, WhatsApp, kurzy, eventy</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Sledovaných eventů</div>
+        <div class="kpi-value">119</div>
+        <div class="kpi-sub">Ecommerce + kurzy + affiliate</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Produktů v katalogu</div>
+        <div class="kpi-value">100+</div>
+        <div class="kpi-sub">Katalog propojen a aktivní</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">A/B testů</div>
+        <div class="kpi-value" style="color:var(--red)">0</div>
+        <div class="kpi-sub" style="color:var(--red)">Žádné — velká příležitost!</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Štítků (tags)</div>
+        <div class="kpi-value">34</div>
+        <div class="kpi-sub">advent, affiliate, kurz, kvíz…</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; padding:14px 18px; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--orange); border-radius:0 10px 10px 0;">
+      <strong style="color:var(--orange)">⚠️ Klíčové zjištění:</strong>
+      <span style="color:var(--text2); font-size:13px; margin-left:8px;">Přesně polovina všech flows (27 z 54) je ve stavu DRAFT — tedy připravena, ale neodesílá. Každý den, kdy jsou vypnuté, přicházíte o příjmy, které by jinak přišly automaticky.</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- FLOWS -->
+  <section class="section" id="flows">
+    <div class="section-header">
+      <h2>⚡ Stav automatizací (Flows)</h2>
+      <p>Flow = automatický email, který se odešle sám — bez zásahu člověka — ve správný moment pro správného zákazníka.</p>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-pill"><strong style="color:var(--green)">🟢 Live:</strong> 27 flows</div>
+      <div class="stat-pill"><strong style="color:var(--red)">🔴 Draft:</strong> 27 flows</div>
+      <div class="stat-pill"><strong>Celkem:</strong> 54 flows</div>
+    </div>
+
+    <!-- LIVE FLOWS -->
+    <h3 style="font-size:15px; margin-bottom:12px; color:var(--green)">🟢 Aktivní flows (odesílají)</h3>
+    <div class="table-wrap" style="margin-bottom:28px;">
+      <table>
+        <thead>
+          <tr>
+            <th>Název flow</th>
+            <th>Status</th>
+            <th>Trigger</th>
+            <th>Co to je &amp; proč je to důležité</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="flow-name">Opuštěný košík - Standard</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Started Checkout</td>
+            <td class="flow-explain">
+              <strong>Záchrana opuštěného košíku.</strong> Zákazník přidal zboží do košíku, ale neobjednal. Tento flow mu automaticky připomene, co zapomněl koupit. Typicky zachrání 5–15 % opuštěných košíků — jde o jeden z nejvýnosnějších automatismů v e-commerce.
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">Welcome - PopUp - dárek čaj DETOX</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric (popup)</td>
+            <td class="flow-explain">
+              <strong>Uvítací email s dárkem po pop-up registraci.</strong> Nový odběratel dostane uvítání a slíbený dárek (čaj DETOX). Buduje první dojem a důvěru. Má typicky 50–70 % open rate.
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">Registrace tianDe ID</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain">
+              <strong>Potvrzení registrace partnerského ID.</strong> Zákazník, který si zaregistroval tianDe ID, dostane automatické potvrzení a instrukce. Kritické pro affiliate/partner program.
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">tianDe ID dokončena registrace</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain">
+              <strong>Onboarding nového partnera.</strong> Po dokončení celé registrace přivítá nového partnera a vysvětlí mu další kroky. Snižuje odpad na začátku funelu.
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">Kvíz Detox</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric (quiz)</td>
+            <td class="flow-explain">
+              <strong>Personalizovaný follow-up po detox kvízu.</strong> Zákazník vyplnil kvíz → dostane výsledky a doporučení produktů přesně pro jeho potřeby. Vysoká relevance = vysoký CTR.
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">Kvíz Vlasy</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric (quiz)</td>
+            <td class="flow-explain">
+              <strong>Personalizovaný follow-up po vlasovém kvízu.</strong> Stejná logika jako detox kvíz — výsledky + doporučení produktů pro péči o vlasy.
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">Webinář - potvrzení registrace</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain">
+              <strong>Potvrzení a připomenutí webináře.</strong> Registrant dostane potvrzení + automatické připomenutí před startem. Snižuje no-show rate (kolik lidí webinář zapomene).
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">Přihláška - potvrzení, kurs tělo jako kompas</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain">
+              <strong>Potvrzení přihlášky na kurz.</strong> Zákazník přihlášený na kurz dostane okamžité potvrzení a instrukce. Buduje důvěru a snižuje storno přihlášek.
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">Přihláška Sebeláska - potvrzení</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain"><strong>Potvrzení přihlášky na kurz Sebeláska.</strong> Viz výše — stejná logika pro druhý kurz.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">hubnutí - potvrzení registrace</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain"><strong>Potvrzení přihlášky na kurz hubnutí.</strong> Okamžité potvrzení s detaily kurzu a úvodními informacemi pro účastníka.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Registrace Kurz hubnutí 2</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain"><strong>Potvrzení přihlášky na kurz hubnutí (2. běh).</strong> Druhá edice kurzu — vlastní flow s oddělenou komunikací.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Sponzor info - nepřihlášený zákazník</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain"><strong>Informace o sponzorství pro nové zákazníky bez ID.</strong> Osloví zákazníky, kteří ještě nemají partnerský účet, a vysvětlí výhody registrace tianDe ID.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Zákaznická podpora - potvrzení</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain"><strong>Automatické potvrzení dotazu na podporu.</strong> Zákazník, který kontaktoval support, dostane okamžité potvrzení. Snižuje opakované dotazy a buduje důvěru.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Bonusové body - připsání</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain"><strong>Notifikace o připsání věrnostních bodů.</strong> Zákazník je informován, když mu přibyly body. Motivuje k dalšímu nákupu a ukazuje hodnotu loyalty programu.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">tianDe - upozornění na dárky</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain"><strong>Připomenutí dostupných dárků.</strong> Zákazník je upozorněn na dárkové akce. Zvyšuje AOV (průměrnou hodnotu objednávky) při akcích.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Happy Birthday - Standard</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Date Based (narozeniny)</td>
+            <td class="flow-explain"><strong>Narozeninový email se slevou.</strong> Automaticky odeslaný email v den narozenin zákazníka. Buduje osobní vztah — zákazníci, kteří dostali narozeninový email, nakupují 3× častěji ten den.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Affiliate - partner registered</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric (affiliate)</td>
+            <td class="flow-explain"><strong>Uvítání nového affiliate partnera.</strong> Nový partner dostane instrukce k programu, affiliate link a motivační obsah k rozjezdu prodejů.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Affiliate - aktivační pin</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric (affiliate)</td>
+            <td class="flow-explain"><strong>Doručení aktivačního PINu partnerovi.</strong> Technický flow — partner dostane svůj aktivační kód bez nutnosti ručního zpracování.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Affiliate - Password reset</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric (affiliate)</td>
+            <td class="flow-explain"><strong>Reset hesla pro partnera.</strong> Transakční email — rychlé doručení odkazu pro reset hesla.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Affiliate - pending partner created</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric (affiliate)</td>
+            <td class="flow-explain"><strong>Notifikace o čekající žádosti nového partnera.</strong> Informuje tým o nové přihlášce k partnerskému programu čekající na schválení.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Reklama - zbavte se bolesti SK</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Added to List (SK)</td>
+            <td class="flow-explain"><strong>Follow-up série po reklamní kampani (SK trh).</strong> Zákazníci z SK reklamy na produkt "zbavte se bolesti" dostávají automatickou sérii emailů s více informacemi.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Reklama Zbavte se bolesti - META</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric (Meta Ads)</td>
+            <td class="flow-explain"><strong>Follow-up po Meta lead ad kampani.</strong> Propojení Facebook/Instagram reklamy s Klaviyo — zákazník vyplní lead form v reklamě a automaticky dostane follow-up emailovou sérii.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Horoskop Valentýn</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain"><strong>Valentýnský horoskop flow.</strong> Sezónní/tematický flow kombinující horoskop s nabídkou. Kreativní přístup k e-mail marketingu.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Měčín popup 26.2.</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Added to List</td>
+            <td class="flow-explain"><strong>Pozvánka na místní event v Měčíně.</strong> Geo-cílený flow pro zákazníky z okolí Měčína — informuje o akcích naživo.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">welcome - brožury - bez bolesti</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Added to List</td>
+            <td class="flow-explain"><strong>Uvítací série po stažení brožury.</strong> Zákazník stáhl brožuru → dostane uvítací sérii s více informacemi o produktu a cestou ke koupi.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">kontakty z renatakralova.cz</td>
+            <td><span class="badge badge-live"><span class="dot dot-live"></span>Live</span></td>
+            <td class="flow-trigger">Metric</td>
+            <td class="flow-explain"><strong>Uvítací flow pro kontakty z partnerského webu.</strong> Zákazníci z externího webu Renata Králová dostávají oddělený uvítací flow relevantní pro jejich vstupní bod.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">test typeflow webhook</td>
+            <td><span class="badge badge-manual"><span class="dot dot-manual"></span>Technický</span></td>
+            <td class="flow-trigger">Metric (webhook)</td>
+            <td class="flow-explain"><strong>Testovací/vývojový flow pro webhook integraci.</strong> Pravděpodobně neaktivně využívaný — doporučujeme zkontrolovat a případně smazat.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- DRAFT FLOWS -->
+    <h3 style="font-size:15px; margin-bottom:12px; color:var(--red)">🔴 Draft flows (NEODESÍLAJÍ — velká příležitost)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Název flow</th>
+            <th>Status</th>
+            <th>Priorita aktivace</th>
+            <th>Co to je &amp; proč to musíte zapnout</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:rgba(239,68,68,.04)">
+            <td class="flow-name">Browse Abandonment - Standard</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-1">🔥 VYSOKÁ</span></td>
+            <td class="flow-explain">
+              <strong>Zákazník si prohlížel produkt, ale nepřidal do košíku.</strong> Personalizovaný email s tím přesným produktem ho může přivést zpět. Váš <em>Viewed Product</em> event je aktivně sledován — flow jen čeká na zapnutí.
+              <div class="explainer">💡 Industryový benchmark: 1–3% konverze z browse sessions. Konzervativně odhadovaný přínos: <strong>+2–5 % celkového obratu</strong> po aktivaci.</div>
+            </td>
+          </tr>
+          <tr style="background:rgba(239,68,68,.04)">
+            <td class="flow-name">Sunset Unengaged Subscribers - Standard</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-1">🔥 VYSOKÁ</span></td>
+            <td class="flow-explain">
+              <strong>Oslovení neaktivních odběratelů před jejich odhlášením.</strong> Zákazníci, kteří neotvírají emaily, poškozují vaši doručitelnost (inbox placement). Tento flow je kontaktuje s "poslední šancí", a kdo nereaguje, je čistě odhlášen. Obojí je cenné.
+              <div class="explainer">💡 Segmenty <em>sunset flow</em> a <em>Nekoupili 120</em> jsou připraveny — stačí flow zapnout. Chrání doručitelnost a typicky reaktivuje 5–15 % neaktivních.</div>
+            </td>
+          </tr>
+          <tr style="background:rgba(239,68,68,.04)">
+            <td class="flow-name">Welcome Series - Standard</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-1">🔥 VYSOKÁ</span></td>
+            <td class="flow-explain">
+              <strong>Uvítací série pro všechny nové odběratele.</strong> Systematická série 3–5 emailů, která představí značku, nabídne první slevu a buduje důvěru. Welcome emaily mají 40–60% open rate — nejvyšší ze všech automatizací.
+              <div class="explainer">💡 Benchmark: 10–15 % konverze z welcome série na první nákup. Bez ní přicházíte o nejengagovanější segment — čerstvé odběratele.</div>
+            </td>
+          </tr>
+          <tr style="background:rgba(239,68,68,.04)">
+            <td class="flow-name">Welcome Series - Customer v. Non-Customer</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-1">🔥 VYSOKÁ</span></td>
+            <td class="flow-explain">
+              <strong>Pokročilejší welcome série — jiná cesta pro zákazníky vs. nové odběratele.</strong> Zákazník, který už nakoupil, dostane jiný obsah než úplný nováček. Vyšší relevance = vyšší konverze.
+            </td>
+          </tr>
+          <tr style="background:rgba(239,68,68,.04)">
+            <td class="flow-name">Poděkování - 1. objednávka bez ID</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-1">🔥 VYSOKÁ</span></td>
+            <td class="flow-explain">
+              <strong>Post-purchase flow po první objednávce.</strong> Zákazník právě nakoupil — ideální moment pro poděkování, tipy k produktu a cross-sell. Zákazníci po 1. nákupu bez tianDe ID jsou nejlépe konvertující cílová skupina pro upgrade na partner účet.
+              <div class="explainer">💡 Post-purchase flow typicky zvyšuje repeat purchase rate o 10–20 %. Váš katalog má 100+ produktů — cross-sell potenciál je obrovský.</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">Dotazník spokojenosti</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-2">Střední</span></td>
+            <td class="flow-explain">
+              <strong>Automatický dotazník spokojenosti po nákupu.</strong> Sbírá zpětnou vazbu a recenze zákazníků. Recenze jsou sociální důkaz — klíčové pro konverze nových zákazníků.
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">WhatsApp - welcome</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-2">Střední</span></td>
+            <td class="flow-explain">
+              <strong>Uvítací zpráva přes WhatsApp.</strong> Pro zákazníky v WhatsApp kanálu. WhatsApp má ještě vyšší open rate než email — využití tohoto flow by posílilo omnichannel přítomnost.
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">Happy Birthday - Standard (duplicate)</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-3">Nízká (duplikát)</span></td>
+            <td class="flow-explain">
+              <strong>Duplikát live narozeninového flow.</strong> Live verze existuje — tento draft je pravděpodobně záloha nebo testovací verze. Doporučujeme zkontrolovat a smazat nebo sloučit.
+            </td>
+          </tr>
+          <tr>
+            <td class="flow-name">Hubnutí - Přihláška kurz hubnutí</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-3">Nízká</span></td>
+            <td class="flow-explain"><strong>Alternativní přihláška na kurz hubnutí.</strong> Live verze existuje. Prověřte, zda je tento draft stále potřeba, nebo ho smažte.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Bonus k detox balíčkům (kvíz)</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-3">Nízká</span></td>
+            <td class="flow-explain"><strong>Bonusový obsah po detox kvízu.</strong> Rozšíření stávajícího kvíz flow. Pokud je obsah připraven, aktivace je rychlá.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">7 tipů</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-3">Nízká</span></td>
+            <td class="flow-explain"><strong>Edukační série "7 tipů".</strong> Obsah-based flow — série tipů pro zákazníky. Buduje expertní autoritu značky.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Hubnutí - čekací seznam na další kurz</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-3">Nízká</span></td>
+            <td class="flow-explain"><strong>Komunikace se zákazníky na čekacím listu kurzu.</strong> Udržuje zájem a připraví zákazníka na příští termín kurzu.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Kolo štěstí - připomenutí výhry</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-3">Nízká</span></td>
+            <td class="flow-explain"><strong>Připomínka nevyzvednuté výhry z Kola štěstí.</strong> Zákazník vyhrál, ale nevyužil výhru — tento flow ho připomene. Může zvýšit konverzi ze hry.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Essential Flow Recommendation_</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-3">Smazat</span></td>
+            <td class="flow-explain" style="color:var(--red)"><strong>Prázdný, nekonfigurovaný flow.</strong> Žádný obsah. Doporučujeme smazat — znečišťuje přehled.</td>
+          </tr>
+          <tr>
+            <td class="flow-name">Flow - Dec 9, 2025, 4:54 PM</td>
+            <td><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft</span></td>
+            <td><span class="pri-badge pri-3">Smazat</span></td>
+            <td class="flow-explain" style="color:var(--red)"><strong>Prázdný, nepojmenovaný flow.</strong> Vypadá jako testovací flow, který nebyl smazán. Doporučujeme smazat.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- GAP ANALYSIS -->
+  <section class="section" id="gaps">
+    <div class="section-header">
+      <h2>🚨 Co NEDĚLÁTE — analýza mezer</h2>
+      <p>Funkce, které máte k dispozici zdarma v Klaviyo, ale nevyužíváte. Seřazeno podle priority a odhadovaného přínosu.</p>
+    </div>
+
+    <div class="gap-grid">
+      <div class="gap-card priority-high">
+        <h3>📭 Browse Abandonment Flow</h3>
+        <div class="gap-status"><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft — neodesílá</span></div>
+        <div class="gap-section">
+          <label>Co to je</label>
+          <p>Zákazník si prohlížel váš produkt, ale nepřidal ho do košíku. Browse abandonment email mu pošle připomínku s přesně tím produktem, který si prohlížel — s jeho fotografií a cenou.</p>
+        </div>
+        <div class="gap-section">
+          <label>Proč to potřebujete</label>
+          <p>Váš event <em>Viewed Product</em> je aktivně sledován. Flow je postavené. Jen je vypnuté. Každý den přichází zákazníci na web, prohlížejí produkty a odcházejí bez emailu.</p>
+        </div>
+        <div class="gap-impact">
+          <label>Odhadovaný přínos (konzervativní)</label>
+          <p>Industryový benchmark: <strong>1–3 % konverze z browse sessions</strong>. Pro e-commerce tohoto objemu: odhadovaně <strong>+2–5 % celkového obratu</strong> po aktivaci.</p>
+        </div>
+        <div class="gap-action gap-action-easy">⚡ Akce: Přepnout Draft → Live (5 minut práce)</div>
+      </div>
+
+      <div class="gap-card priority-high">
+        <h3>💤 Sunset / Win-Back Flow</h3>
+        <div class="gap-status"><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft — neodesílá</span></div>
+        <div class="gap-section">
+          <label>Co to je</label>
+          <p>Zákazník vás ignoruje — neotvírá emaily 90–180 dní. Sunset flow mu pošle "poslední šanci" s atraktivní nabídkou. Kdo nereaguje, je automaticky odhlášen. Obojí je cenné: buď zákazníka reaktivujete, nebo vyčistíte seznam.</p>
+        </div>
+        <div class="gap-section">
+          <label>Proč to potřebujete</label>
+          <p>Neaktivní odběratelé poškozují vaši reputaci u emailových serverů (Gmail, Seznam) → vaše emaily padají do spamu i u aktivních zákazníků. Máte segmenty <em>Nekoupili 120</em> a <em>sunset flow</em> — jsou připraveny.</p>
+        </div>
+        <div class="gap-impact">
+          <label>Odhadovaný přínos</label>
+          <p>Typická reaktivace: <strong>5–15 % neaktivních zákazníků</strong>. Zlepšení inbox placement pro všechny ostatní kampaně: odhadovaně <strong>+5–10 % open rate</strong> celkově.</p>
+        </div>
+        <div class="gap-action gap-action-easy">⚡ Akce: Přepnout Draft → Live (10 minut práce)</div>
+      </div>
+
+      <div class="gap-card priority-high">
+        <h3>👋 Welcome Series</h3>
+        <div class="gap-status"><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft — neodesílá</span></div>
+        <div class="gap-section">
+          <label>Co to je</label>
+          <p>Automatická série 3–5 emailů pro každého nového odběratele. Emailem 1: "Vítejte + sleva". Email 2: "Kdo jsme, co děláme". Email 3: "Bestsellery". Email 4: "Recenze zákazníků". Email 5: "Poslední šance na slevu".</p>
+        </div>
+        <div class="gap-section">
+          <label>Proč to potřebujete</label>
+          <p>Nový odběratel je nejengagovanější v okamžiku registrace. Bez welcome série tuto příležitost promarníte. Máte welcome popup flow pro detox — ale ne systematický welcome pro hlavní audience.</p>
+        </div>
+        <div class="gap-impact">
+          <label>Odhadovaný přínos</label>
+          <p>Welcome emaily mají <strong>40–60% open rate</strong> — nejvyšší ze všech typů. Benchmark konverze na první nákup: <strong>10–15 % nových odběratelů</strong>.</p>
+        </div>
+        <div class="gap-action gap-action-medium">🛠 Akce: Přepnout Draft → Live, zkontrolovat CZ/SK varianty (30–60 min)</div>
+      </div>
+
+      <div class="gap-card priority-high">
+        <h3>🛍 Post-Purchase Flow</h3>
+        <div class="gap-status"><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft — neodesílá</span></div>
+        <div class="gap-section">
+          <label>Co to je</label>
+          <p>Automatický email po každém nákupu. Poděkování za objednávku, tipy jak produkt nejlépe používat, doporučení doplňkových produktů, a pozvání k registraci tianDe ID (pokud zákazník ještě nemá).</p>
+        </div>
+        <div class="gap-section">
+          <label>Proč to potřebujete</label>
+          <p>Zákazník, který právě nakoupil, je v nejvyšší náladě pro opakovaný nákup. Máte 100+ produktů v katalogu a systém věrnostních bodů — ale žádný automatický follow-up po nákupu.</p>
+        </div>
+        <div class="gap-impact">
+          <label>Odhadovaný přínos</label>
+          <p>Post-purchase flow typicky zvyšuje <strong>repeat purchase rate o 10–20 %</strong>. Každý zákazník navíc = compound efekt přes celý jeho lifetime.</p>
+        </div>
+        <div class="gap-action gap-action-medium">🛠 Akce: Přepnout Draft → Live, přidat product recommendations (1–2 hod)</div>
+      </div>
+
+      <div class="gap-card priority-high">
+        <h3>🧪 A/B Testování</h3>
+        <div class="gap-status"><span class="badge badge-draft" style="background:rgba(239,68,68,.12); color:var(--red)"><span class="dot dot-draft"></span>Vůbec se nepoužívá</span></div>
+        <div class="gap-section">
+          <label>Co to je</label>
+          <p>A/B test v Klaviyo = pošlete email ve dvou variantách (např. jiný předmět emailu) a Klaviyo automaticky zjistí, která varianta má lepší open rate — a rozešle zbytek té lepší variantě.</p>
+        </div>
+        <div class="gap-section">
+          <label>Proč to potřebujete</label>
+          <p>Odeslali jste 400+ kampaní bez jediného A/B testu. Každý email je tak lost opportunity pro optimalizaci. I malé zlepšení v open rate se sčítá přes stovky budoucích kampaní.</p>
+        </div>
+        <div class="gap-impact">
+          <label>Odhadovaný přínos</label>
+          <p>Typické zlepšení open rate přes A/B testování: <strong>5–15 %</strong>. Na základně tisíců odběratelů: více lidí vidí každou kampaň → přímý dopad na konverze a obrat.</p>
+        </div>
+        <div class="gap-action gap-action-easy">⚡ Akce: Na příštím emailu zapnout A/B, 2 varianty předmětu, 80/20 split (2 minuty)</div>
+      </div>
+
+      <div class="gap-card priority-medium">
+        <h3>📦 Back-in-Stock Flow</h3>
+        <div class="gap-status"><span class="badge badge-draft" style="background:rgba(249,115,22,.12); color:var(--orange)"><span class="dot" style="background:var(--orange)"></span>Event existuje, flow chybí</span></div>
+        <div class="gap-section">
+          <label>Co to je</label>
+          <p>Zákazník chtěl koupit produkt, ale byl vyprodaný — přihlásil se k upozornění. Když se produkt vrátí na sklad, Klaviyo mu automaticky pošle email: "Je zpět v prodeji!"</p>
+        </div>
+        <div class="gap-section">
+          <label>Proč to potřebujete</label>
+          <p>Váš event <em>TianDe Back In Stock</em> je aktivně trackován — zákazníci se přihlašují k upozorněním. Ale žádný email se neodešle. Jde o nejlépe konvertující typ emailu vůbec.</p>
+        </div>
+        <div class="gap-impact">
+          <label>Odhadovaný přínos</label>
+          <p>Back-in-stock emaily mají <strong>konverzní rate 10–30 %</strong> — zákazník už dával najevo zájem. Nízko visící ovoce.</p>
+        </div>
+        <div class="gap-action gap-action-easy">⚡ Akce: Vytvořit nový flow s triggerem TianDe Back In Stock (1–2 hod)</div>
+      </div>
+
+      <div class="gap-card priority-medium">
+        <h3>🔮 Prediktivní analytika</h3>
+        <div class="gap-status"><span class="badge badge-draft" style="background:rgba(249,115,22,.12); color:var(--orange)"><span class="dot" style="background:var(--orange)"></span>Dostupné, nevyužívané</span></div>
+        <div class="gap-section">
+          <label>Co to je</label>
+          <p>Klaviyo předpovídá budoucí chování každého zákazníka: Kdy nejspíš nakoupí? Jaká je šance, že odejde? Jaká je jeho odhadovaná celoživotní hodnota (CLV)? Tato data jsou v Klaviyo zabudovaná a dostupná zdarma.</p>
+        </div>
+        <div class="gap-section">
+          <label>Proč to potřebujete</label>
+          <p>Aktuálně cílíte podle toho, zda zákazník email otevřel (engagement). Prediktivní analytika vám umožní cílit podle toho, kdy zákazník nakoupí — daleko přesnější a výnosnější.</p>
+        </div>
+        <div class="gap-impact">
+          <label>Odhadovaný přínos</label>
+          <p>Prediktivní segmenty typicky zvyšují konverzní rate kampaní o <strong>20–30 %</strong>. Lepší targeting = méně zbytečných emailů, více nákupů.</p>
+        </div>
+        <div class="gap-action gap-action-easy">⚡ Akce: Vytvořit segmenty využívající predicted_clv a churn_risk (bez kódování, 30 min)</div>
+      </div>
+
+      <div class="gap-card priority-medium">
+        <h3>💎 RFM Segmentace</h3>
+        <div class="gap-status"><span class="badge badge-draft" style="background:rgba(249,115,22,.12); color:var(--orange)"><span class="dot" style="background:var(--orange)"></span>Chybí</span></div>
+        <div class="gap-section">
+          <label>Co to je</label>
+          <p>RFM = Recency (kdy naposledy nakoupil), Frequency (kolikrát nakoupil), Monetary (kolik utratil). Rozdělí zákazníky na: "Champions", "Věrní zákazníci", "V ohrožení", "Hibernující" atd.</p>
+        </div>
+        <div class="gap-section">
+          <label>Proč to potřebujete</label>
+          <p>Aktuálně odesíláte stejné emaily zákazníkovi, který utratil 200 Kč, i tomu, který utratil 50 000 Kč. RFM segmentace umožní VIP zákazníkům dát VIP zacházení a churnující zákazníky zachytit dřív.</p>
+        </div>
+        <div class="gap-impact">
+          <label>Odhadovaný přínos</label>
+          <p>Cílené VIP programy zvyšují <strong>průměrnou hodnotu objednávky o 20–40 %</strong> u top segmentu. Zachycení churnujících zákazníků včas zachrání část z nich.</p>
+        </div>
+        <div class="gap-action gap-action-medium">🛠 Akce: Vytvořit 5–6 RFM segmentů v Klaviyo na základě Placed Order metrik (2–3 hod)</div>
+      </div>
+
+      <div class="gap-card priority-medium">
+        <h3>⭐ Review / Dotazník spokojenosti</h3>
+        <div class="gap-status"><span class="badge badge-draft"><span class="dot dot-draft"></span>Draft — neodesílá</span></div>
+        <div class="gap-section">
+          <label>Co to je</label>
+          <p>Automatický email po nákupu, který zákazníka požádá o recenzi nebo zpětnou vazbu. Výsledky lze použít jako social proof na webu i v emailech.</p>
+        </div>
+        <div class="gap-section">
+          <label>Proč to potřebujete</label>
+          <p>Recenze jsou klíčové pro konverze nových zákazníků. Flow existuje jako draft (<em>Dotazník spokojenosti</em>) — stačí aktivovat.</p>
+        </div>
+        <div class="gap-impact">
+          <label>Odhadovaný přínos</label>
+          <p>Každá sbíraná recenze = investice do konverzního rate webu. Weby s recenzemi konvertují průměrně o <strong>15–30 % lépe</strong>.</p>
+        </div>
+        <div class="gap-action gap-action-easy">⚡ Akce: Přepnout Draft → Live (15 min)</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- CAMPAIGNS -->
+  <section class="section" id="campaigns">
+    <div class="section-header">
+      <h2>📨 Kampaně — přehled aktivity</h2>
+      <p>Na základě 400+ odeslaných kampaní od října 2025 do dubna 2026.</p>
+    </div>
+    <div class="campaign-grid">
+      <div class="camp-card">
+        <h3>📅 Frekvence odesílání</h3>
+        <div class="freq-bar">
+          <div class="freq-row">
+            <div class="freq-label">Duben '26</div>
+            <div class="freq-track"><div class="freq-fill" style="width:100%"></div></div>
+            <div class="freq-val">10+</div>
+          </div>
+          <div class="freq-row">
+            <div class="freq-label">Březen '26</div>
+            <div class="freq-track"><div class="freq-fill" style="width:85%"></div></div>
+            <div class="freq-val">~35</div>
+          </div>
+          <div class="freq-row">
+            <div class="freq-label">Únor '26</div>
+            <div class="freq-track"><div class="freq-fill" style="width:80%"></div></div>
+            <div class="freq-val">~32</div>
+          </div>
+          <div class="freq-row">
+            <div class="freq-label">Leden '26</div>
+            <div class="freq-track"><div class="freq-fill" style="width:75%"></div></div>
+            <div class="freq-val">~30</div>
+          </div>
+          <div class="freq-row">
+            <div class="freq-label">Prosinec '25</div>
+            <div class="freq-track"><div class="freq-fill" style="width:90%"></div></div>
+            <div class="freq-val">~40</div>
+          </div>
+        </div>
+        <p style="font-size:11px; color:var(--text3); margin-top:14px;">Konzistentně 5–10+ emailů týdně. Velmi vysoká frekvence — pozor na únavu odběratelů bez Sunset flow.</p>
+      </div>
+      <div class="camp-card">
+        <h3>🌍 CZ vs SK targeting</h3>
+        <div class="freq-bar">
+          <div class="freq-row">
+            <div class="freq-label">CZ kampaně</div>
+            <div class="freq-track"><div class="freq-fill" style="width:60%; background:var(--blue)"></div></div>
+            <div class="freq-val">~60%</div>
+          </div>
+          <div class="freq-row">
+            <div class="freq-label">SK kampaně</div>
+            <div class="freq-track"><div class="freq-fill" style="width:35%; background:var(--green)"></div></div>
+            <div class="freq-val">~35%</div>
+          </div>
+          <div class="freq-row">
+            <div class="freq-label">Ostatní</div>
+            <div class="freq-track"><div class="freq-fill" style="width:5%; background:var(--text3)"></div></div>
+            <div class="freq-val">~5%</div>
+          </div>
+        </div>
+        <p style="font-size:11px; color:var(--text3); margin-top:14px;">Silná bilingvní operace. CZ a SK varianty téměř každé kampaně odesílány ve stejný den.</p>
+      </div>
+      <div class="camp-card">
+        <h3>📋 Typy obsahu kampaní</h3>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;">
+          <span style="background:var(--bg3); color:var(--text2); padding:4px 10px; border-radius:6px; font-size:12px;">📚 Kurzy (hubnutí, sebeláska, tělo)</span>
+          <span style="background:var(--bg3); color:var(--text2); padding:4px 10px; border-radius:6px; font-size:12px;">🎙 Webináře a záznamy</span>
+          <span style="background:var(--bg3); color:var(--text2); padding:4px 10px; border-radius:6px; font-size:12px;">🛍 Produktové akce</span>
+          <span style="background:var(--bg3); color:var(--text2); padding:4px 10px; border-radius:6px; font-size:12px;">📰 Newsletter / Novinky</span>
+          <span style="background:var(--bg3); color:var(--text2); padding:4px 10px; border-radius:6px; font-size:12px;">👥 Affiliate info</span>
+          <span style="background:var(--bg3); color:var(--text2); padding:4px 10px; border-radius:6px; font-size:12px;">🌿 Sezónní kampaně</span>
+        </div>
+      </div>
+      <div class="camp-card" style="border-color:var(--red)">
+        <h3 style="color:var(--red)">⚠️ Chybí: A/B testování</h3>
+        <p style="font-size:13px; color:var(--text2); line-height:1.6;">Z celkových <strong style="color:var(--text)">400+ kampaní</strong> nemá <strong style="color:var(--red)">žádná</strong> zapnutý A/B test. Smart Sending je u většiny kampaní <strong style="color:var(--red)">vypnutý</strong> (<code>use_smart_sending: false</code>), což zvyšuje riziko přeposílání.</p>
+        <div class="gap-action gap-action-easy" style="margin-top:12px;">⚡ Rychlé řešení: Zapnout A/B test na příštím emailu + re-aktivovat Smart Sending</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- SEGMENTS -->
+  <section class="section" id="segments">
+    <div class="section-header">
+      <h2>🎯 Segmenty — všech 27</h2>
+      <p>Segment = automaticky se aktualizující seznam zákazníků splňujících určité podmínky. Slouží k přesnému cílení kampaní.</p>
+    </div>
+    <div class="seg-grid">
+      <div class="seg-card">
+        <h4>Aktivní 120 CZ ⭐</h4>
+        <div class="seg-tag">Engagement · Jazyk CZ</div>
+        <p>Zákazníci, kteří otevřeli nebo klikli na email v posledních 120 dnech a mají jazyk CZ. Jádrová audience pro CZ kampaně. <strong>Doporučení:</strong> Přidat purchased filter pro vyšší intent.</p>
+      </div>
+      <div class="seg-card">
+        <h4>Aktivní 120 SK ⭐</h4>
+        <div class="seg-tag">Engagement · Jazyk SK</div>
+        <p>Stejné jako výše, ale pro SK trh. Základ pro SK kampaně. <strong>Doporučení:</strong> Zkombinovat s prediktivní CLV pro prioritizaci.</p>
+      </div>
+      <div class="seg-card">
+        <h4>Aktivní 120 bez ID CZ ⭐</h4>
+        <div class="seg-tag">Engagement + bez tianDeID · CZ</div>
+        <p>Aktivní CZ zákazníci, kteří ještě nemají tianDe ID. <strong>Klíčový segment</strong> pro konverzi na partnerský program — jsou engagovaní, ale ještě nezregistrovaní.</p>
+      </div>
+      <div class="seg-card">
+        <h4>Aktivní 120 bez ID SK ⭐</h4>
+        <div class="seg-tag">Engagement + bez tianDeID · SK</div>
+        <p>Aktivní SK zákazníci bez tianDe ID. Stejná příležitost jako výše pro slovenský trh.</p>
+      </div>
+      <div class="seg-card">
+        <h4>Aktivní 120 35% CZ ⭐</h4>
+        <div class="seg-tag">Engagement + 35% sleva · CZ</div>
+        <p>Aktivní CZ zákazníci se 35% slevovým statusem. Loajální zákazníci na vyšší slevové úrovni. <strong>Doporučení:</strong> Cílte na ně exkluzivními nabídkami pro udržení tohoto statusu.</p>
+      </div>
+      <div class="seg-card">
+        <h4>Aktivní 120 35% SK ⭐</h4>
+        <div class="seg-tag">Engagement + 35% sleva · SK</div>
+        <p>SK varianta výše. Zákazníci s vyšší loajalitou na slovenském trhu.</p>
+      </div>
+      <div class="seg-card">
+        <h4>Nekoupili 120 ⭐</h4>
+        <div class="seg-tag">No purchase · 120 dní</div>
+        <p>Zákazníci, kteří nekoupili v posledních 120 dnech. <strong>Klíčový segment pro Win-back flow</strong> — ale flow je stále v draftu! Tento segment čeká na využití.</p>
+      </div>
+      <div class="seg-card">
+        <h4>sunset flow ⭐</h4>
+        <div class="seg-tag">Email consent · Subscribed</div>
+        <p>Emailoví odběratelé s aktivním souhlasem. Připravený segment pro Sunset flow — ale flow je v draftu. Použít jako audience pro reaktivaci kampaň.</p>
+      </div>
+      <div class="seg-card">
+        <h4>all ⭐</h4>
+        <div class="seg-tag">Všichni s emailem</div>
+        <p>Všichni profily s emailovou adresou. Master segment — používejte opatrně, ideálně jen pro kriticky důležité sdělení. Časté použití zvyšuje únavu odběratelů.</p>
+      </div>
+      <div class="seg-card">
+        <h4>narozeniny</h4>
+        <div class="seg-tag">Birthday metric</div>
+        <p>Profily s nastaveným datem narozenin. Propojeno s live Birthday flow. <strong>Doporučení:</strong> Zkontrolovat pokrytí — kolik % profilů má vyplněné narozeniny?</p>
+      </div>
+      <div class="seg-card">
+        <h4>Okolí Měčín 60km ⭐</h4>
+        <div class="seg-tag">Geo · PSČ</div>
+        <p>Zákazníci z oblasti do 60 km od Měčína (PSČ filtr). Využito pro pozvánky na místní eventy. Unikátní geo-targeting přístup.</p>
+      </div>
+      <div class="seg-card">
+        <h4>Okolí Litoměřic 60km ⭐</h4>
+        <div class="seg-tag">Geo · PSČ</div>
+        <p>Zákazníci z oblasti okolo Litoměřic. Druhý geo segment pro regionální eventy. <strong>Doporučení:</strong> Zvažte rozšíření na další města.</p>
+      </div>
+      <div class="seg-card">
+        <h4>FB - Bez tianDeID - nakoupili 0–150</h4>
+        <div class="seg-tag">FB Ads audience · Purchase + no ID</div>
+        <p>Zákazníci bez ID, kteří nakoupili v 150 dnech. Synced s Facebook Ads pro lookalike audiences. Konverzní segment pro Facebook kampaně.</p>
+      </div>
+      <div class="seg-card">
+        <h4>FB - tianDeID, aktivní, nakoupili 150d</h4>
+        <div class="seg-tag">FB Ads audience · ID + Purchase</div>
+        <p>Partneři s ID, kteří aktivně nakoupili. Nejhodnotnější zákazníci synced do Facebook pro lookalike. <strong>Výborný základ pro prospecting.</strong></p>
+      </div>
+      <div class="seg-card">
+        <h4>FB audience Abandoned cart ⭐</h4>
+        <div class="seg-tag">Facebook retargeting</div>
+        <p>Zákazníci s opuštěným košíkem synced do Facebook Ads pro retargeting. Kombinace email flow + Facebook retargeting je silná strategie.</p>
+      </div>
+      <div class="seg-card">
+        <h4>FB TiandeID 150+ (bez nákupu)</h4>
+        <div class="seg-tag">FB Ads · ID holders, no recent purchase</div>
+        <p>Partneři s ID bez nákupu v 150 dnech. Riskantní segment — partneři, kteří přestali nakupovat. Vhodný pro Win-back kampaně.</p>
+      </div>
+      <div class="seg-card">
+        <h4>Webináře ⭐</h4>
+        <div class="seg-tag">Webinar registrations</div>
+        <p>Všichni, kdo se kdy přihlásili na webinář. Vysoce engagovaná, edukačně orientovaná audience. Vhodní pro kurzy a prémiové produkty.</p>
+      </div>
+      <div class="seg-card">
+        <h4>aktuální webinář ⭐</h4>
+        <div class="seg-tag">Current webinar · Live</div>
+        <p>Registrovaní na právě probíhající webinář. Použít pro logistické emaily a připomínky.</p>
+      </div>
+      <div class="seg-card">
+        <h4>kurz hubnutí ⭐</h4>
+        <div class="seg-tag">All-time course · Registration</div>
+        <p>Všichni, kdo se kdy přihlásili na kurz hubnutí. Velký zájem o zdraví a hubnutí — vhodní pro cross-sell produktů z této kategorie.</p>
+      </div>
+      <div class="seg-card">
+        <h4>kurz hubnutí 2</h4>
+        <div class="seg-tag">Course 2 · Metric</div>
+        <p>Přihlášení na 2. běh kurzu hubnutí. Separátní segment pro komunikaci specificky pro tuto kohortu.</p>
+      </div>
+      <div class="seg-card">
+        <h4>webinář hubnutí</h4>
+        <div class="seg-tag">Post-Feb 2026 · Webinar registrations</div>
+        <p>Účastníci webináře hubnutí od února 2026. Čerstvá audience s vysokou relevancí pro kurz hubnutí.</p>
+      </div>
+      <div class="seg-card">
+        <h4>kolo - noví</h4>
+        <div class="seg-tag">Wheel of Fortune · Post-Jan 2025</div>
+        <p>Zákazníci získaní přes Kolo štěstí od ledna 2025. Gamification segment — sledujte jejich konverzní rate vs. ostatní akvisice.</p>
+      </div>
+      <div class="seg-card">
+        <h4>telefony</h4>
+        <div class="seg-tag">Phone number · Profiles</div>
+        <p>Profily s telefonním číslem. Základ pro SMS a WhatsApp kampaně. <strong>Doporučení:</strong> Aktivovat klaviyo SMS channel a využít tento segment.</p>
+      </div>
+      <div class="seg-card">
+        <h4>7 tipů</h4>
+        <div class="seg-tag">Campaign audience</div>
+        <p>Audience pro kampaň "7 tipů". Obsahový segment — zákazníci s zájmem o edukační obsah.</p>
+      </div>
+      <div class="seg-card">
+        <h4>Tělo jako kompas - přihlášky</h4>
+        <div class="seg-tag">Course registrations</div>
+        <p>Přihlášení na kurz Tělo jako kompas. Vhodný pro cross-sell dalších kurzů a produktů pro mindfulness/zdraví.</p>
+      </div>
+      <div class="seg-card">
+        <h4>Tělo jako kompas - pozdní přihlášky</h4>
+        <div class="seg-tag">Late sign-ups</div>
+        <p>Zákazníci, kteří se přihlásili na kurz těsně před startem. Specifická komunikace pro "pozdní" přihlášení.</p>
+      </div>
+      <div class="seg-card">
+        <h4>kurz hubnutí 2 - pozdější přihlášky</h4>
+        <div class="seg-tag">Late sign-ups · Course 2</div>
+        <p>Zákazníci přihlášení do 2. běhu kurzu hubnutí v pozdějším termínu. Specifická onboardingová komunikace.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; padding:14px 18px; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--yellow); border-radius:0 10px 10px 0;">
+      <strong style="color:var(--yellow)">💡 Klíčové doporučení pro segmenty:</strong>
+      <span style="color:var(--text2); font-size:13px; margin-left:8px;">Aktuální segmenty jsou engagement-based (otevřel/klikl). Přidejte RFM segmenty (Champions, Loyal, At Risk) a prediktivní segmenty (High CLV, Churn Risk) pro daleko přesnější cílení.</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- RECOMMENDATIONS -->
+  <section class="section" id="recommendations">
+    <div class="section-header">
+      <h2>🎯 Doporučení — Akční plán</h2>
+      <p>Prioritizovaný seznam kroků seřazený od největšího ROI. Náročnost = skutečná práce potřebná v Klaviyo.</p>
+    </div>
+    <div class="rec-table-wrap">
+      <table class="rec-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Priorita</th>
+            <th>Akce</th>
+            <th>Náročnost</th>
+            <th>Odhadovaný přínos</th>
+            <th>Doporučený termín</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><span class="pri-badge pri-1">🔥 Kritická</span></td>
+            <td><strong>Aktivovat Browse Abandonment flow</strong><br><span style="color:var(--text3);font-size:11px;">Otevřít draft → zkontrolovat obsah → Live</span></td>
+            <td><span class="effort-easy">Snadné</span></td>
+            <td>+2–5 % celkového obratu</td>
+            <td>Tento týden</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><span class="pri-badge pri-1">🔥 Kritická</span></td>
+            <td><strong>Aktivovat Sunset / Win-Back flow</strong><br><span style="color:var(--text3);font-size:11px;">Nastavit audience (Nekoupili 120) → Live</span></td>
+            <td><span class="effort-easy">Snadné</span></td>
+            <td>Ochrana deliverability + 5–15 % reaktivace</td>
+            <td>Tento týden</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><span class="pri-badge pri-1">🔥 Kritická</span></td>
+            <td><strong>Spustit A/B test na příštím emailu</strong><br><span style="color:var(--text3);font-size:11px;">2 varianty předmětu, 80/20 split, 4h výběr vítěze</span></td>
+            <td><span class="effort-easy">Snadné</span></td>
+            <td>Baseline data + 5–15 % zlepšení open rate</td>
+            <td>Příští email</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><span class="pri-badge pri-1">🔥 Kritická</span></td>
+            <td><strong>Aktivovat Welcome Series</strong><br><span style="color:var(--text3);font-size:11px;">Zkontrolovat CZ/SK obsah draftu → Live</span></td>
+            <td><span class="effort-med">Střední</span></td>
+            <td>40–60 % open rate, 10–15 % konverze na 1. nákup</td>
+            <td>Do 14 dní</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><span class="pri-badge pri-1">🔥 Kritická</span></td>
+            <td><strong>Aktivovat Post-Purchase flow</strong><br><span style="color:var(--text3);font-size:11px;">Přidat product recommendations z katalogu → Live</span></td>
+            <td><span class="effort-med">Střední</span></td>
+            <td>+10–20 % repeat purchase rate</td>
+            <td>Do 14 dní</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><span class="pri-badge pri-2">Vysoká</span></td>
+            <td><strong>Vytvořit Back-in-Stock flow</strong><br><span style="color:var(--text3);font-size:11px;">Trigger: TianDe Back In Stock event (již trackován)</span></td>
+            <td><span class="effort-easy">Snadné</span></td>
+            <td>10–30 % konverze zainteresovaných zákazníků</td>
+            <td>Do 30 dní</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><span class="pri-badge pri-2">Vysoká</span></td>
+            <td><strong>Aktivovat Smart Sending na kampaních</strong><br><span style="color:var(--text3);font-size:11px;">Přepnout use_smart_sending: true na nových kampaních</span></td>
+            <td><span class="effort-easy">Snadné</span></td>
+            <td>Snížení unsubscribe rate, ochrana reputace</td>
+            <td>Ihned</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td><span class="pri-badge pri-2">Vysoká</span></td>
+            <td><strong>Vytvořit prediktivní segmenty</strong><br><span style="color:var(--text3);font-size:11px;">High CLV, Churn Risk, Due for Next Order (bez kódování)</span></td>
+            <td><span class="effort-easy">Snadné</span></td>
+            <td>+20–30 % vyšší response rate na cílené kampaně</td>
+            <td>Do 30 dní</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td><span class="pri-badge pri-2">Vysoká</span></td>
+            <td><strong>Aktivovat Dotazník spokojenosti</strong><br><span style="color:var(--text3);font-size:11px;">Draft existuje → Live (15 min práce)</span></td>
+            <td><span class="effort-easy">Snadné</span></td>
+            <td>Sbírání recenzí pro social proof</td>
+            <td>Do 30 dní</td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td><span class="pri-badge pri-3">Střední</span></td>
+            <td><strong>Implementovat RFM segmentaci</strong><br><span style="color:var(--text3);font-size:11px;">Champions, Loyal, At Risk, Hibernating segmenty</span></td>
+            <td><span class="effort-med">Střední</span></td>
+            <td>+20–40 % vyšší AOV u VIP segmentu</td>
+            <td>Do 60 dní</td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td><span class="pri-badge pri-3">Střední</span></td>
+            <td><strong>Přidat product recommendations do flows</strong><br><span style="color:var(--text3);font-size:11px;">Dynamic product blocks v post-purchase a browse flows</span></td>
+            <td><span class="effort-med">Střední</span></td>
+            <td>Vyšší AOV v existujících flows</td>
+            <td>Do 60 dní</td>
+          </tr>
+          <tr>
+            <td>12</td>
+            <td><span class="pri-badge pri-3">Střední</span></td>
+            <td><strong>Smazat 2 prázdné flows</strong><br><span style="color:var(--text3);font-size:11px;">Essential Flow Recommendation_ + Flow Dec 9</span></td>
+            <td><span class="effort-easy">Snadné</span></td>
+            <td>Přehlednost, méně zmatku v Flows</td>
+            <td>Ihned</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- GLOSSARY -->
+  <section class="section" id="glossary">
+    <div class="section-header">
+      <h2>📖 Slovníček pojmů</h2>
+      <p>Vysvětlení klíčových pojmů z email marketingu — pro každého, ne jen pro techniky.</p>
+    </div>
+    <div class="glossary-grid">
+      <div class="glossary-item">
+        <h4>Flow</h4>
+        <p>Automatický email nebo série emailů, která se spustí sama na základě akce zákazníka (přidání do košíku, nákup, narozeniny…). Jednou nastavíte, dál běží bez zásahu.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Trigger</h4>
+        <p>Spouštěč flow — událost, která flow aktivuje. Např. "zákazník přidal do košíku" = trigger pro cart abandonment flow.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Segment</h4>
+        <p>Dynamicky se aktualizující skupina zákazníků splňujících určité podmínky. Na rozdíl od listu se aktualizuje automaticky — zákazníci do segmentu vstupují a vystupují podle svého chování.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>List</h4>
+        <p>Statický seznam odběratelů — zákazníci jsou přidáni ručně nebo importem. Typicky používán pro opt-in formuláře a importy kontaktů.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Metric / Event</h4>
+        <p>Sledovaná akce zákazníka v Klaviyo. Např. "Viewed Product", "Placed Order", "Started Checkout". Klaviyo zaznamenává 119 různých eventů.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>A/B Test</h4>
+        <p>Rozdělíte audience na 2 skupiny — každá dostane jiný email (jiný předmět, obsah…). Po době testování Klaviyo automaticky rozešle lepší variantu zbytku audience.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>CLV (Customer Lifetime Value)</h4>
+        <p>Odhadovaná celková hodnota zákazníka za celou dobu jeho nákupů. Zákazník s CLV 10 000 Kč stojí za víc investice do udržení než zákazník s CLV 200 Kč.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>RFM Segmentace</h4>
+        <p>Rozdělení zákazníků podle Recency (kdy naposledy nakoupil), Frequency (kolikrát nakoupil) a Monetary (kolik utratil). Pomáhá identifikovat VIP zákazníky, zákazníky v ohrožení atd.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Open Rate</h4>
+        <p>Procento zákazníků, kteří email otevřeli. Průměr v e-commerce: 20–25 %. Welcome emaily mívají 40–60 %. Nízký open rate signalizuje problém s předmětem nebo doručitelností.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Click Rate (CTR)</h4>
+        <p>Procento zákazníků, kteří klikli na odkaz v emailu. Průměr: 2–5 %. Vyšší CTR = relevantnější obsah nebo lepší CTA (výzva k akci).</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Deliverability</h4>
+        <p>Schopnost vašich emailů dostat se do doručené pošty (místo spamu). Ovlivňuje ji kvalita seznamu, frekvence odesílání, engagement zákazníků. Neaktivní odběratelé deliverability poškozují.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Sunset Policy</h4>
+        <p>Pravidlo pro odhlášení neaktivních odběratelů. Zákazník, který neotvíral emaily 6–12 měsíců, dostane "poslední šanci" a pokud nereaguje, je odhlášen. Chrání deliverability celého seznamu.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Browse Abandonment</h4>
+        <p>Zákazník si prohlížel produkt na webu, ale nepřidal do košíku ani nenakoupil. Browse abandonment email mu produkt připomene — s jeho fotografií a cenou.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Cart Abandonment</h4>
+        <p>Zákazník přidal produkt do košíku, ale neobjednal. Typicky nejlépe konvertující automated flow — zákazník byl velmi blízko k nákupu.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Win-back / Reaktivace</h4>
+        <p>Kampaň nebo flow cílící na zákazníky, kteří přestali nakupovat nebo otvírat emaily. Cíl: buď je reaktivovat atraktivní nabídkou, nebo je čistě odhlásit.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Back-in-Stock</h4>
+        <p>Notifikace zákazníkovi, že produkt, o který měl zájem (byl vyprodaný), je opět dostupný. Má extrémně vysokou konverzní rate, protože zákazník zájem dříve prokázal.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>Smart Sending</h4>
+        <p>Funkce Klaviyo, která automaticky přeskočí zákazníka, který nedávno dostal email. Chrání před přeposíláním a snižuje unsubscribe rate. Aktuálně vypnuto na většině kampaní.</p>
+      </div>
+      <div class="glossary-item">
+        <h4>CDP (Customer Data Platform)</h4>
+        <p>Platforma pro sjednocení dat o zákazníkovi z různých zdrojů (web, email, SMS, WhatsApp, kurzy, e-shop). Klaviyo funguje jako CDP — spojuje všechna data na jednom místě.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- MANAGEMENT -->
+  <section class="section" id="management">
+    <div class="section-header">
+      <h2>💼 Management komentář</h2>
+      <p>Pohled z ptačí perspektivy — co vidí různé role při pohledu na tato data.</p>
+    </div>
+    <div class="mgmt-grid">
+      <div class="mgmt-card">
+        <div class="mgmt-role">💼 Marketingový ředitel (CMO) — skeptický pohled</div>
+        <blockquote>"400+ odeslaných kampaní — to vypadá skvěle na první pohled. Ale polovina flows je v draftu, žádné A/B testování, Smart Sending vypnutý. Pracujeme hodně, ale ne nutně chytře. Tři věci uděláme příští týden: zapneme Browse Abandonment, Sunset flow, a spustíme první A/B test. Výsledky ukážeme za 30 dní."</blockquote>
+        <div class="mgmt-points">
+          <div class="mgmt-point">📊 Potřebujeme benchmarky: Open rate, CTR, Conversion rate — konkrétní čísla, ne jen počty</div>
+          <div class="mgmt-point">🧪 A/B testování musí být standard od teď — žádný email bez testu</div>
+          <div class="mgmt-point">🎯 Přejít od "send to all" k přesnému segmentování podle RFM</div>
+        </div>
+      </div>
+      <div class="mgmt-card">
+        <div class="mgmt-role">🏛 Board — strategický pohled</div>
+        <blockquote>"Infrastruktura je výjimečně dobrá pro firmu tohoto věku — 119 trackovaných eventů, bilingvní operace, affiliate program, kurzy, WhatsApp. To je top 10 % Klaviyo použití. Ale výnosnost té infrastruktury je nízká: 27 flows nevysílá. Nízko visící ovoce je jasné: aktivovat 5 draft flows bez nového výdaje = přímý příjmový impakt v horizontu týdnů."</blockquote>
+        <div class="mgmt-points">
+          <div class="mgmt-point">✅ Silné stránky: Tracking, segmentace, bilingvní ops, affiliate automatizace, quizzes</div>
+          <div class="mgmt-point">⚠️ Největší riziko: Žádná Welcome série + žádný Post-purchase flow = money left on table</div>
+          <div class="mgmt-point">💰 Odhad: Aktivace 5 draft flows bez nového investičního výdaje → +5–15 % email revenue</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px; padding:20px; background:var(--bg2); border:1px solid var(--border); border-radius:12px;">
+      <h3 style="font-size:14px; font-weight:700; margin-bottom:12px;">📋 Quick Win Summary — Co udělat tento týden</h3>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.2); border-radius:8px;">
+          <span style="font-size:16px;">1️⃣</span>
+          <div>
+            <div style="font-size:13px; font-weight:600;">Zapnout Browse Abandonment flow</div>
+            <div style="font-size:11px; color:var(--text3);">Flows → Browse Abandonment - Standard → Review → Status: Live</div>
+          </div>
+          <span class="effort-easy" style="margin-left:auto; font-size:11px;">5 min</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.2); border-radius:8px;">
+          <span style="font-size:16px;">2️⃣</span>
+          <div>
+            <div style="font-size:13px; font-weight:600;">Zapnout Sunset flow</div>
+            <div style="font-size:11px; color:var(--text3);">Flows → Sunset Unengaged Subscribers → Nastavit segment Nekoupili 120 → Live</div>
+          </div>
+          <span class="effort-easy" style="margin-left:auto; font-size:11px;">10 min</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.2); border-radius:8px;">
+          <span style="font-size:16px;">3️⃣</span>
+          <div>
+            <div style="font-size:13px; font-weight:600;">Spustit A/B test na příštím newsletteru</div>
+            <div style="font-size:11px; color:var(--text3);">Campaigns → nová kampaň → A/B test → 2 předměty emailu → 80/20 split</div>
+          </div>
+          <span class="effort-easy" style="margin-left:auto; font-size:11px;">2 min</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.2); border-radius:8px;">
+          <span style="font-size:16px;">4️⃣</span>
+          <div>
+            <div style="font-size:13px; font-weight:600;">Aktivovat Welcome Series (do 14 dní)</div>
+            <div style="font-size:11px; color:var(--text3);">Flows → Welcome Series - Customer v. Non-Customer → CZ/SK review → Live</div>
+          </div>
+          <span class="effort-med" style="margin-left:auto; font-size:11px;">1–2 hod</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; padding:10px 14px; background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.2); border-radius:8px;">
+          <span style="font-size:16px;">5️⃣</span>
+          <div>
+            <div style="font-size:13px; font-weight:600;">Aktivovat Post-Purchase flow (do 14 dní)</div>
+            <div style="font-size:11px; color:var(--text3);">Flows → Poděkování - 1. objednávka bez ID → přidat product rec. → Live</div>
+          </div>
+          <span class="effort-med" style="margin-left:auto; font-size:11px;">1–2 hod</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="text-align:center; padding:32px 0; color:var(--text3); font-size:12px; border-top:1px solid var(--border); margin-top:48px;">
+    Klaviyo Analytics — Diamond Plus s.r.o. · Království tianDe · kralovstvi-tiande.cz<br>
+    Data pulled: 14. 4. 2026 · Account: U9rq9t · Read-only API access
+  </div>
+
+</div>
+</body>
+</html>
